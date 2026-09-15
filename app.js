@@ -55,28 +55,82 @@
     return { tasks: [] };
   }
 
-  function demoMonth() {
-    const day = Math.min(Math.max(now.getDate(), 1), new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate());
-    const deadlineA = Math.min(day + 2, new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate());
-    const deadlineB = Math.min(day + 6, new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate());
+  function scheduleCells(ranges, color, deadlineDays = []) {
+    const cells = {};
+    ranges.forEach(([from, to]) => {
+      for (let day = from; day <= to; day += 1) cells[day] = { color, deadline: false };
+    });
+    deadlineDays.forEach(day => {
+      cells[day] = { color: cells[day]?.color || color, deadline: true };
+    });
+    return cells;
+  }
+
+  function septemberSourceMonth() {
+    const red = COLORS[0].value;
+    const gold = COLORS[1].value;
+    const green = COLORS[2].value;
+    const blue = COLORS[3].value;
+    const pink = COLORS[4].value;
+
     return {
       tasks: [
-        { id: createId(), team: "MIG", direction: "Запуски", title: "Подготовка нового размещения", cells: rangeCells(Math.max(1, day - 1), deadlineA, COLORS[0].value, deadlineA) },
-        { id: createId(), team: "MIG", direction: "Креативы", title: "Согласование креативов", cells: rangeCells(day, deadlineB, COLORS[1].value, deadlineB) },
-        { id: createId(), team: "LEVEL", direction: "Медиапланы", title: "Корректировки медиаплана", cells: rangeCells(Math.min(day + 1, deadlineB), deadlineB, COLORS[2].value, deadlineB) },
-        { id: createId(), team: "MIG", direction: "Аналитика", title: "Обновление отчётности", cells: rangeCells(Math.max(1, day - 2), day, COLORS[3].value, day) }
+        { id: createId(), team: "MIG", direction: "Запуски", title: "Запуск Августовских размещений", cells: scheduleCells([[1, 4]], red, [4]) },
+        { id: createId(), team: "MIG", direction: "Финансы", title: "Отправляем закрывы за пред. месяц (Август)", cells: scheduleCells([[10, 14]], pink, [14]) },
+        { id: createId(), team: "MIG", direction: "Финансы", title: "Плановые приложения за текущий (Сентябрь)", cells: scheduleCells([[24, 25]], pink, [25]) },
+        { id: createId(), team: "MIG", direction: "Креативы", title: "Карта креативов \\ скриншоты за пред. мес", cells: scheduleCells([[1, 30]], gold) },
+        { id: createId(), team: "MIG", direction: "Креативы", title: "Фигма за текущий месяц", cells: scheduleCells([[1, 30]], gold) },
+        { id: createId(), team: "MIG", direction: "Креативы", title: "Обсудить персонализацию креативов для сегментов", cells: {} },
+        { id: createId(), team: "LEVEL", direction: "Креативы", title: "Получаем ТЗ от LVL", cells: scheduleCells([], gold, [22]) },
+        { id: createId(), team: "MIG", direction: "Креативы", title: "Готовим ресайзы", cells: scheduleCells([[23, 25]], gold, [28]) },
+        { id: createId(), team: "LEVEL", direction: "Креативы", title: "Получаем видео креативы (если новые ролики)", cells: scheduleCells([[24, 25]], gold, [24]) },
+        { id: createId(), team: "MIG", direction: "Креативы", title: "Адаптация видео креативов", cells: scheduleCells([[24, 25]], gold, [28]) },
+        { id: createId(), team: "LEVEL", direction: "Креативы", title: "Согласование креативов (корректировки)", cells: scheduleCells([[24, 25], [28, 30]], gold, [30]) },
+        { id: createId(), team: "MIG", direction: "Креативы", title: "Список UTM на аппрув + BI + Comagic", cells: scheduleCells([[25, 25], [28, 29]], gold, [29]) },
+        { id: createId(), team: "MIG", direction: "Креативы", title: "Заведение видео РК в кабинетах", cells: scheduleCells([[25, 25], [28, 29]], gold, [29]) },
+        { id: createId(), team: "MIG", direction: "Креативы", title: "Заведение всех РК в кабинетах", cells: scheduleCells([[25, 25], [28, 29]], gold, [29]) },
+        { id: createId(), team: "MIG", direction: "Аналитика", title: "Выгрузки MS и DB", cells: scheduleCells([], blue, [28]) },
+        { id: createId(), team: "MIG", direction: "Кликхаус", title: "Заносить данные в КХ", cells: {} },
+        { id: createId(), team: "MIG", direction: "Исследования", title: "Обновление ММО и в т.ч. Digital", cells: {} },
+        { id: createId(), team: "MIG", direction: "Спецпроекты", title: "Обсудить идеи от отдела СП", cells: scheduleCells([], blue, [15]) },
+        { id: createId(), team: "MIG", direction: "Медиапланы", title: "1-я версия МП на след мес", cells: scheduleCells([[7, 11]], green, [11]) },
+        { id: createId(), team: "LEVEL", direction: "Медиапланы", title: "Корректировки МП", cells: scheduleCells([[14, 15]], green) },
+        { id: createId(), team: "MIG", direction: "Медиапланы", title: "Апдейт МП с учетом корректировок", cells: scheduleCells([], green, [18]) },
+        { id: createId(), team: "LEVEL", direction: "Медиапланы", title: "Фин подтверждение МП", cells: scheduleCells([], green, [25]) },
+        { id: createId(), team: "MIG", direction: "ПБА", title: "ПБА за прошлый месяц", cells: scheduleCells([[10, 15]], gold, [15]) }
       ]
     };
   }
 
-  function rangeCells(from, to, color, deadlineDay) {
-    const cells = {};
-    for (let day = from; day <= to; day += 1) cells[day] = { color, deadline: day === deadlineDay };
-    return cells;
+  function defaultState() {
+    return { version: 2, months: { "2026-09": septemberSourceMonth() } };
   }
 
-  function defaultState() {
-    return { version: 1, months: { [monthKey(now.getFullYear(), now.getMonth())]: demoMonth() } };
+  function migrateState(candidate) {
+    if ((Number(candidate.version) || 1) >= 2) return candidate;
+
+    const targetKey = "2026-09";
+    const sourceTasks = septemberSourceMonth().tasks;
+    const currentTasks = candidate.months[targetKey]?.tasks || [];
+    const legacyDemoTitles = new Set([
+      "Подготовка нового размещения",
+      "Согласование креативов",
+      "Корректировки медиаплана",
+      "Обновление отчётности"
+    ]);
+    const untouchedDemo = currentTasks.length > 0 && currentTasks.every(task => legacyDemoTitles.has(task.title));
+
+    if (!currentTasks.length || untouchedDemo) {
+      candidate.months[targetKey] = { tasks: sourceTasks };
+    } else {
+      const existingTitles = new Set(currentTasks.map(task => task.title));
+      candidate.months[targetKey] = {
+        tasks: currentTasks.concat(sourceTasks.filter(task => !existingTitles.has(task.title)))
+      };
+    }
+    candidate.version = 2;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(candidate));
+    return candidate;
   }
 
   function normalizeState(candidate) {
@@ -105,7 +159,8 @@
   function loadState() {
     try {
       const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY));
-      return normalizeState(parsed) || defaultState();
+      const normalized = normalizeState(parsed);
+      return normalized ? migrateState(normalized) : defaultState();
     } catch (_) {
       return defaultState();
     }
