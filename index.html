@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#20233a">
+  <title>Календарь активностей — Level Group</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="hero__inner">
+      <div>
+        <div class="brand">
+          <div class="brand__mark">LV</div>
+          <div class="brand__copy">Level Group<br>Media Instinct Group</div>
+        </div>
+        <p class="eyebrow">Рабочее пространство команды</p>
+        <h1>Календарь активностей</h1>
+        <p class="hero__subtitle">Единый календарь запусков, материалов, аналитики и контрольных точек.</p>
+      </div>
+      <aside class="today-card">
+        <span>Сегодня</span>
+        <strong id="todayDate">—</strong>
+        <em id="todayWeekday">—</em>
+      </aside>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="deadline-panel" aria-labelledby="deadlineTitle">
+      <div class="deadline-panel__head">
+        <div>
+          <p class="eyebrow">Ближайший фокус</p>
+          <h2 id="deadlineTitle">Задачи и дедлайны</h2>
+        </div>
+        <span class="deadline-panel__count" id="deadlineCount">0 задач</span>
+      </div>
+      <div class="deadline-list" id="deadlineList"></div>
+    </section>
+
+    <section class="calendar-card">
+      <div class="calendar-toolbar">
+        <div class="month-navigation">
+          <button class="icon-button" id="previousYear" type="button" aria-label="Предыдущий год">←</button>
+          <strong id="currentYear">2026</strong>
+          <button class="icon-button" id="nextYear" type="button" aria-label="Следующий год">→</button>
+        </div>
+        <div class="month-tabs" id="monthTabs" aria-label="Выбор месяца"></div>
+        <div class="save-area">
+          <span class="save-status" id="saveStatus">Все изменения сохранены</span>
+          <button class="primary-button" id="saveButton" type="button">Сохранить изменения</button>
+        </div>
+      </div>
+
+      <div class="calendar-title-row">
+        <div>
+          <p class="eyebrow">План работ</p>
+          <h2 id="calendarTitle">—</h2>
+        </div>
+        <div class="legend" aria-label="Инструменты ячеек">
+          <span class="legend__label">Заливка</span>
+          <div class="color-palette" id="colorPalette"></div>
+          <button class="tool-button" id="deadlineTool" type="button" aria-pressed="false">ДЛ</button>
+          <button class="tool-button tool-button--clear" id="clearTool" type="button" aria-pressed="false">Ластик</button>
+        </div>
+      </div>
+
+      <p class="usage-hint">Выберите цвет и проводите по ячейкам. Для дедлайна включите «ДЛ». Названия задач и поля слева можно редактировать прямо в таблице.</p>
+
+      <div class="table-scroll" id="tableScroll">
+        <table class="activity-table" id="activityTable">
+          <thead id="calendarHead"></thead>
+          <tbody id="calendarBody"></tbody>
+        </table>
+      </div>
+
+      <div class="calendar-footer">
+        <button class="secondary-button" id="addTask" type="button">+ Добавить задачу</button>
+        <div class="footer-actions">
+          <button class="text-button" id="exportData" type="button">Экспорт</button>
+          <label class="text-button text-button--label" for="importData">Импорт</label>
+          <input id="importData" type="file" accept="application/json,.json" hidden>
+        </div>
+      </div>
+    </section>
+
+    <p class="storage-note">В первой версии данные сохраняются только в этом браузере. Экспорт создаёт резервную копию для переноса на другой компьютер.</p>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
