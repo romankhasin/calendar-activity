@@ -157,7 +157,9 @@ button:hover, .text-button--label:hover { transform: translateY(-1px); border-co
 .empty-row td { height: 110px; color: var(--muted); text-align: center; }
 
 .calendar-footer { display: flex; justify-content: space-between; gap: 16px; align-items: center; padding: 18px 22px; }
+.calendar-footer__primary { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .secondary-button { padding: 0 17px; color: var(--bronze); font-size: 11px; }
+.secondary-button--copy { color: var(--ink); }
 .footer-actions { display: flex; gap: 8px; }
 .text-button { min-height: 36px; padding: 0 13px; color: var(--muted); font-size: 10px; }
 .text-button--label { display: inline-grid; place-items: center; }
@@ -189,4 +191,5 @@ button:hover, .text-button--label:hover { transform: translateY(-1px); border-co
   .activity-table .task-col { left: 182px; width: 220px; min-width: 220px; }
   .activity-table .delete-col { left: 402px; }
   .activity-table .day-head, .activity-table .day-cell { width: 23px; min-width: 23px; }
+  .calendar-footer { align-items: flex-start; flex-direction: column; }
 }

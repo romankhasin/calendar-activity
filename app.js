@@ -38,6 +38,7 @@
     calendarHead: document.getElementById("calendarHead"),
     calendarBody: document.getElementById("calendarBody"),
     addTask: document.getElementById("addTask"),
+    copyPreviousMonth: document.getElementById("copyPreviousMonth"),
     exportData: document.getElementById("exportData"),
     importData: document.getElementById("importData"),
     toast: document.getElementById("toast")
@@ -185,6 +186,31 @@
     return state.months[key];
   }
 
+  function previousMonth() {
+    const date = new Date(visibleYear, visibleMonth - 1, 1);
+    return { year: date.getFullYear(), month: date.getMonth() };
+  }
+
+  function cloneTasksForMonth(tasks, year, month) {
+    const lastDay = new Date(year, month + 1, 0).getDate();
+    return tasks.map(task => {
+      const cells = {};
+      Object.entries(task.cells || {}).forEach(([day, cell]) => {
+        const dayNumber = Number(day);
+        if (Number.isInteger(dayNumber) && dayNumber >= 1 && dayNumber <= lastDay) {
+          cells[dayNumber] = { color: cell.color || "", deadline: Boolean(cell.deadline) };
+        }
+      });
+      return {
+        id: createId(),
+        team: task.team,
+        direction: task.direction,
+        title: task.title,
+        cells
+      };
+    });
+  }
+
   function renderToday() {
     els.todayDate.textContent = new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long", year: "numeric" }).format(now);
     els.todayWeekday.textContent = new Intl.DateTimeFormat("ru-RU", { weekday: "long" }).format(now);
@@ -194,6 +220,13 @@
     els.currentYear.textContent = String(visibleYear);
     els.monthTabs.innerHTML = MONTHS.map((name, index) => `<button class="month-tab${index === visibleMonth ? " active" : ""}" type="button" data-month="${index}">${name.slice(0, 3)}</button>`).join("");
     els.monthTabs.querySelector(".active")?.scrollIntoView({ inline: "center", block: "nearest" });
+  }
+
+  function renderCopyButton() {
+    const source = previousMonth();
+    const sourceYear = source.year === visibleYear ? "" : ` ${source.year}`;
+    els.copyPreviousMonth.textContent = `Скопировать ${MONTHS[source.month].toLowerCase()}${sourceYear}`;
+    els.copyPreviousMonth.title = `Перенести все задачи, заливки и дедлайны из ${MONTHS_GENITIVE[source.month]} ${source.year}`;
   }
 
   function renderPalette() {
@@ -311,9 +344,31 @@
     });
   }
 
+  function copyPreviousMonth() {
+    const source = previousMonth();
+    const sourceTasks = state.months[monthKey(source.year, source.month)]?.tasks || [];
+    if (!sourceTasks.length) {
+      showToast(`В ${MONTHS_GENITIVE[source.month]} ${source.year} нет задач для копирования`);
+      return;
+    }
+
+    const target = currentMonthData();
+    if (target.tasks.length) {
+      const confirmed = window.confirm(`В ${MONTHS_GENITIVE[visibleMonth]} уже есть задачи. Заменить их данными из ${MONTHS_GENITIVE[source.month]}?`);
+      if (!confirmed) return;
+    }
+
+    target.tasks = cloneTasksForMonth(sourceTasks, visibleYear, visibleMonth);
+    setDirty();
+    renderCalendar();
+    renderDeadlines();
+    showToast(`${sourceTasks.length} ${pluralize(sourceTasks.length, ["задача скопирована", "задачи скопированы", "задач скопировано"])} из ${MONTHS_GENITIVE[source.month]}`);
+  }
+
   function switchMonth(month) {
     visibleMonth = month;
     renderMonthTabs();
+    renderCopyButton();
     renderCalendar();
   }
 
@@ -354,8 +409,8 @@
   }
 
   function bindEvents() {
-    document.getElementById("previousYear").addEventListener("click", () => { visibleYear -= 1; renderMonthTabs(); renderCalendar(); });
-    document.getElementById("nextYear").addEventListener("click", () => { visibleYear += 1; renderMonthTabs(); renderCalendar(); });
+    document.getElementById("previousYear").addEventListener("click", () => { visibleYear -= 1; renderMonthTabs(); renderCopyButton(); renderCalendar(); });
+    document.getElementById("nextYear").addEventListener("click", () => { visibleYear += 1; renderMonthTabs(); renderCopyButton(); renderCalendar(); });
     els.monthTabs.addEventListener("click", event => {
       const button = event.target.closest("[data-month]");
       if (button) switchMonth(Number(button.dataset.month));
@@ -371,6 +426,7 @@
     els.clearTool.addEventListener("click", () => { activeTool = activeTool === "clear" ? "paint" : "clear"; renderPalette(); });
     els.saveButton.addEventListener("click", saveState);
     els.addTask.addEventListener("click", addTask);
+    els.copyPreviousMonth.addEventListener("click", copyPreviousMonth);
     els.exportData.addEventListener("click", exportState);
     els.importData.addEventListener("change", event => importState(event.target.files[0]));
 
@@ -426,6 +482,7 @@
   function renderAll() {
     renderToday();
     renderMonthTabs();
+    renderCopyButton();
     renderPalette();
     renderCalendar();
     renderDeadlines();
