@@ -121,6 +121,7 @@ button:hover, .text-button--label:hover { transform: translateY(-1px); border-co
 .save-status { max-width: 150px; color: var(--green); font-size: 9px; font-weight: 700; line-height: 1.35; text-align: right; }
 .save-status.dirty { color: var(--red); }
 .primary-button { padding: 0 18px; border-color: var(--ink); background: var(--ink); color: #fff; font-size: 11px; }
+.primary-button:disabled { cursor: wait; opacity: 0.58; transform: none; box-shadow: none; }
 
 .calendar-title-row { display: flex; justify-content: space-between; gap: 20px; align-items: end; padding: 24px 24px 12px; }
 .legend, .color-palette { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }

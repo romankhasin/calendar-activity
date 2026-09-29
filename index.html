@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=3">
+  <link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
   <header class="hero">
@@ -91,10 +91,12 @@
       </div>
     </section>
 
-    <p class="storage-note">В первой версии данные сохраняются только в этом браузере. Экспорт создаёт резервную копию для переноса на другой компьютер.</p>
+    <p class="storage-note">Данные сохраняются в общей базе и доступны всем пользователям календаря. Локальная копия используется только как резерв при временной недоступности сети.</p>
   </main>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="app.js?v=3"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js?v=1"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>

@@ -2,6 +2,7 @@
   "use strict";
 
   const STORAGE_KEY = "level-calendar-activity-v1";
+  const SHARED_ROW_ID = "shared";
   const MONTHS = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
   const MONTHS_GENITIVE = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
   const COLORS = [
@@ -21,6 +22,10 @@
   let isPointerDown = false;
   let dirty = false;
   let toastTimer = null;
+  let supabaseClient = null;
+  let serverRevision = null;
+  let sharedReady = false;
+  let realtimeChannel = null;
 
   const els = {
     todayDate: document.getElementById("todayDate"),
@@ -167,11 +172,144 @@
     }
   }
 
-  function saveState() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  function applySharedRow(row, notify = false) {
+    const sharedState = normalizeState(row?.payload);
+    if (!sharedState) throw new Error("Invalid shared calendar state");
+    state = sharedState;
+    serverRevision = Number(row.revision);
+    sharedReady = true;
+    saveLocalBackup();
     setDirty(false);
-    renderDeadlines();
-    showToast("Изменения сохранены в этом браузере");
+    renderAll();
+    if (notify) showToast("Календарь обновлён другим пользователем");
+  }
+
+  async function readSharedRow() {
+    const { data, error } = await supabaseClient
+      .from("calendar_state")
+      .select("payload, revision, updated_at")
+      .eq("id", SHARED_ROW_ID)
+      .maybeSingle();
+    if (error) throw error;
+    return data;
+  }
+
+  async function createSharedRow() {
+    const { data, error } = await supabaseClient
+      .from("calendar_state")
+      .insert({ id: SHARED_ROW_ID, payload: state, revision: 1 })
+      .select("payload, revision, updated_at")
+      .single();
+    if (error) {
+      if (error.code === "23505") return readSharedRow();
+      throw error;
+    }
+    return data;
+  }
+
+  function subscribeToSharedChanges() {
+    if (realtimeChannel) supabaseClient.removeChannel(realtimeChannel);
+    realtimeChannel = supabaseClient
+      .channel("shared-calendar")
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "calendar_state", filter: `id=eq.${SHARED_ROW_ID}` },
+        payload => {
+          const incomingRevision = Number(payload.new?.revision || 0);
+          if (incomingRevision <= Number(serverRevision || 0)) return;
+          if (dirty) {
+            els.saveStatus.textContent = "На сервере есть более новая версия";
+            els.saveStatus.classList.add("dirty");
+            showToast("Другой пользователь изменил календарь. Обновите страницу перед сохранением.");
+            return;
+          }
+          try {
+            applySharedRow(payload.new, true);
+          } catch (error) {
+            console.error("Shared calendar realtime update failed", error);
+          }
+        }
+      )
+      .subscribe();
+  }
+
+  async function initializeSharedStorage() {
+    const config = window.CALENDAR_CONFIG || {};
+    if (!config.supabaseUrl || !config.supabasePublishableKey || !window.supabase?.createClient) {
+      sharedReady = false;
+      els.saveButton.disabled = true;
+      els.saveStatus.textContent = "Общая база не подключена";
+      els.saveStatus.classList.add("dirty");
+      return;
+    }
+
+    els.saveButton.disabled = true;
+    els.saveStatus.textContent = "Загружаем общий календарь…";
+    els.saveStatus.classList.remove("dirty");
+    try {
+      if (!supabaseClient) {
+        supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabasePublishableKey, {
+          auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
+        });
+      }
+      const sharedRow = await readSharedRow() || await createSharedRow();
+      applySharedRow(sharedRow);
+      subscribeToSharedChanges();
+      showToast("Общий календарь загружен");
+    } catch (error) {
+      sharedReady = false;
+      els.saveStatus.textContent = "Сервер недоступен — показана резервная копия";
+      els.saveStatus.classList.add("dirty");
+      showToast("Не удалось загрузить общую базу. Попробуйте обновить страницу.");
+      console.error("Shared calendar initialization failed", error);
+    } finally {
+      els.saveButton.disabled = false;
+    }
+  }
+
+  function saveLocalBackup() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  async function saveState() {
+    if (!sharedReady || !supabaseClient || serverRevision === null) {
+      await initializeSharedStorage();
+      return;
+    }
+
+    els.saveButton.disabled = true;
+    els.saveStatus.textContent = "Сохраняем для всех…";
+    try {
+      const nextRevision = serverRevision + 1;
+      const { data, error } = await supabaseClient
+        .from("calendar_state")
+        .update({ payload: state, revision: nextRevision })
+        .eq("id", SHARED_ROW_ID)
+        .eq("revision", serverRevision)
+        .select("revision, updated_at")
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) {
+        els.saveStatus.textContent = "На сервере есть более новая версия";
+        els.saveStatus.classList.add("dirty");
+        showToast("Другой пользователь уже изменил календарь. Обновите страницу и повторите правки.");
+        return;
+      }
+
+      serverRevision = Number(data.revision);
+      saveLocalBackup();
+      setDirty(false);
+      renderDeadlines();
+      showToast("Изменения сохранены и доступны всем");
+    } catch (error) {
+      saveLocalBackup();
+      els.saveStatus.textContent = "Не удалось сохранить на сервере";
+      els.saveStatus.classList.add("dirty");
+      showToast("Сервер временно недоступен. Изменения сохранены как локальная резервная копия.");
+      console.error("Shared calendar save failed", error);
+    } finally {
+      els.saveButton.disabled = false;
+    }
   }
 
   function setDirty(value = true) {
@@ -490,4 +628,5 @@
 
   bindEvents();
   renderAll();
+  initializeSharedStorage();
 })();
