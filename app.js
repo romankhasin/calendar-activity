@@ -12,6 +12,11 @@
     { name: "Голубой", value: "#cbdff0" },
     { name: "Розовый", value: "#e9d1dc" }
   ];
+  const DIRECTION_COLORS = {
+    "Запуски": "#c44747", "Финансы": "#9b5588", "Креативы": "#b07819",
+    "Аналитика": "#326ca3", "Кликхаус": "#6857a0", "Исследования": "#268275",
+    "Спецпроекты": "#a15337", "Медиапланы": "#438047", "ПБА": "#a24c70"
+  };
 
   const now = new Date();
   let visibleYear = now.getFullYear();
@@ -385,13 +390,23 @@
       const today = visibleYear === now.getFullYear() && visibleMonth === now.getMonth() && day === now.getDate();
       return `<th class="day-head${weekend ? " weekend" : ""}${today ? " today" : ""}" title="${new Intl.DateTimeFormat("ru-RU", { weekday: "long" }).format(date)}">${day}</th>`;
     }).join("");
-    els.calendarHead.innerHTML = `<tr><th class="sticky team-col">Команда</th><th class="sticky direction-col">Направление</th><th class="sticky task-col">Задача</th><th class="sticky delete-col"></th>${headDays}</tr>`;
+    els.calendarHead.innerHTML = `<tr><th class="sticky team-col">Команда</th><th class="sticky direction-col">Направление</th><th class="sticky task-col">Задача</th><th class="sticky delete-col">Порядок</th>${headDays}</tr>`;
 
     const tasks = currentMonthData().tasks;
-    els.calendarBody.innerHTML = tasks.length ? tasks.map(task => taskRow(task, days)).join("") : `<tr class="empty-row"><td colspan="${days + 4}">В этом месяце пока нет задач. Добавьте первую строку.</td></tr>`;
+    els.calendarBody.innerHTML = tasks.length ? tasks.map((task, index) => taskRow(task, days, index, tasks.length)).join("") : `<tr class="empty-row"><td colspan="${days + 4}">В этом месяце пока нет задач. Добавьте первую строку.</td></tr>`;
   }
 
-  function taskRow(task, days) {
+  function directionColor(direction) {
+    const name = String(direction || "").trim();
+    if (!name) return "#69717f";
+    if (DIRECTION_COLORS[name]) return DIRECTION_COLORS[name];
+    let hash = 0;
+    for (const char of name.toLocaleLowerCase("ru-RU")) hash = (hash * 31 + char.codePointAt(0)) >>> 0;
+    return `hsl(${hash % 360} 52% 38%)`;
+  }
+
+  function taskRow(task, days, index, count) {
+    const directionStyle = `--direction-color:${directionColor(task.direction)}`;
     const dayCells = Array.from({ length: days }, (_, i) => {
       const day = i + 1;
       const cell = task.cells[day] || {};
@@ -400,11 +415,11 @@
       const today = visibleYear === now.getFullYear() && visibleMonth === now.getMonth() && day === now.getDate();
       return `<td class="day-cell${weekend ? " weekend" : ""}${today ? " today" : ""}${cell.deadline ? " is-deadline" : ""}" data-task-id="${task.id}" data-day="${day}" style="${cell.color ? `background-color:${cell.color}` : ""}"></td>`;
     }).join("");
-    return `<tr data-task-id="${task.id}">
+    return `<tr data-task-id="${task.id}" style="${directionStyle}">
       <td class="sticky team-col team-cell"><div class="editable" contenteditable="true" data-field="team" title="${escapeHtml(task.team)}">${escapeHtml(task.team)}</div></td>
       <td class="sticky direction-col direction-cell"><div class="editable" contenteditable="true" data-field="direction" title="${escapeHtml(task.direction)}">${escapeHtml(task.direction)}</div></td>
       <td class="sticky task-col task-cell"><div class="editable" contenteditable="true" data-field="title" title="${escapeHtml(task.title)}">${escapeHtml(task.title)}</div></td>
-      <td class="sticky delete-col"><button class="delete-task" type="button" title="Удалить задачу" aria-label="Удалить задачу">×</button></td>
+      <td class="sticky delete-col"><div class="row-actions"><button class="move-task" type="button" data-move="-1" title="Поднять задачу" aria-label="Поднять задачу" ${index === 0 ? "disabled" : ""}>↑</button><button class="move-task" type="button" data-move="1" title="Опустить задачу" aria-label="Опустить задачу" ${index === count - 1 ? "disabled" : ""}>↓</button><button class="delete-task" type="button" title="Удалить задачу" aria-label="Удалить задачу">×</button></div></td>
       ${dayCells}
     </tr>`;
   }
@@ -598,10 +613,24 @@
       if (!task) return;
       task[editable.dataset.field] = editable.textContent.trim();
       editable.title = editable.textContent.trim();
+      if (editable.dataset.field === "direction") editable.closest("tr").style.setProperty("--direction-color", directionColor(task.direction));
       setDirty();
       renderDeadlines();
     });
     els.calendarBody.addEventListener("click", event => {
+      const moveButton = event.target.closest(".move-task");
+      if (moveButton) {
+        const tasks = currentMonthData().tasks;
+        const taskId = moveButton.closest("tr").dataset.taskId;
+        const index = tasks.findIndex(item => item.id === taskId);
+        const target = index + Number(moveButton.dataset.move);
+        if (index < 0 || target < 0 || target >= tasks.length) return;
+        [tasks[index], tasks[target]] = [tasks[target], tasks[index]];
+        setDirty();
+        renderCalendar();
+        els.calendarBody.querySelector(`[data-task-id="${taskId}"] [data-move="${moveButton.dataset.move}"]`)?.focus();
+        return;
+      }
       const button = event.target.closest(".delete-task");
       if (!button) return;
       const taskId = button.closest("tr").dataset.taskId;
