@@ -1,0 +1,89 @@
+/* Тема «Power BI»: светло-серый холст, плоские белые визуалы, Segoe UI.
+   Подключается после styles.css. Откат — убрать <link> на этот файл. */
+:root {
+  color-scheme: light;
+  --ink: #252423; --muted: #605e5c; --paper: #fff; --soft: #f3f2f1; --line: #e1dfdd;
+  --sky: #deecf9; --gold: #f2c811; --bronze: #605e5c; --red: #c50f1f; --green: #107c10;
+  --shadow: none;
+  --pbi-strong: #8a8886; --pbi-hover: #f3f2f1; --pbi-blue: #0f6cbd;
+}
+body, button, input { font-family: "Segoe UI", "Segoe UI Web (West European)", -apple-system, BlinkMacSystemFont, "Roboto", "Helvetica Neue", Arial, sans-serif; }
+body { background: #f3f2f1; letter-spacing: 0; }
+* { letter-spacing: 0 !important; }
+.today-card, .deadline-panel, .calendar-card, .toast, .deadline-item { backdrop-filter: none; box-shadow: none; }
+
+/* шапка — полоса отчёта на тёмной панели */
+.hero { padding: 0; border-bottom: 1px solid var(--line); background: linear-gradient(#252423, #252423) top / 100% 44px no-repeat, #fff; }
+.hero__inner { align-items: stretch; gap: 0; max-width: none; grid-template-columns: 1fr auto; }
+.hero__inner > div:first-child { padding: 12px 24px 14px; }
+.brand { margin: -12px -24px 12px; padding: 8px 24px; gap: 10px; background: #252423; color: #fff; }
+.brand__mark { width: 28px; height: 28px; border: 0; border-radius: 2px; background: #f2c811; color: #252423; box-shadow: none; font-size: 12px; font-weight: 700; }
+.brand__copy { color: #c8c6c4; font-size: 12px; font-weight: 400; letter-spacing: 0; text-transform: none; line-height: 1.2; }
+.eyebrow { margin: 0 0 2px; color: var(--muted); font-size: 12px; font-weight: 400; text-transform: none; }
+h1 { max-width: none; font-size: 24px; font-weight: 600; line-height: 1.25; }
+.hero__subtitle { margin: 4px 0 0; font-size: 14px; line-height: 1.45; }
+.today-card { align-self: start; min-width: 200px; margin: 56px 24px 12px; padding: 8px 14px; border: 1px solid var(--line); border-left: 4px solid #f2c811; border-radius: 2px; background: #faf9f8; }
+.today-card span, .today-card em { font-size: 12px; font-weight: 400; text-transform: none; }
+.today-card strong { margin: 2px 0; font-size: 18px; font-weight: 600; }
+
+.shell { max-width: none; margin: 12px 0 32px; padding: 0 24px; }
+.deadline-panel, .calendar-card { border: 1px solid var(--line); border-radius: 2px; background: #fff; }
+.deadline-panel { padding: 16px; }
+.deadline-panel h2, .calendar-card h2 { font-size: 16px; font-weight: 600; }
+.deadline-panel__count { padding: 2px 8px; border: 1px solid var(--line); border-radius: 2px; background: #faf9f8; color: var(--muted); font-size: 12px; font-weight: 400; }
+.deadline-list { gap: 12px; }
+.deadline-item { border: 1px solid var(--line); border-top: 4px solid #118dff; border-radius: 2px; background: #fff; }
+.deadline-item__date { color: var(--muted); font-size: 12px; font-weight: 400; text-transform: none; }
+.deadline-item__date b { font-weight: 600; }
+.deadline-item h3 { font-size: 14px; font-weight: 600; }
+.deadline-item p { font-size: 12px; }
+.calendar-card { margin-top: 12px; }
+.calendar-toolbar { padding: 10px 16px; background: #faf9f8; }
+
+/* кнопки как в Fluent */
+.icon-button, .tool-button, .secondary-button, .primary-button, .text-button {
+  min-height: 32px; border: 1px solid var(--pbi-strong); border-radius: 2px; background: #fff; color: var(--ink);
+  font-size: 13px; font-weight: 400; transition: none; }
+button:hover, .text-button--label:hover { transform: none; border-color: var(--ink); background: var(--pbi-hover); box-shadow: none; }
+.primary-button, .primary-button:hover { border-color: var(--pbi-blue); background: var(--pbi-blue); color: #fff; font-weight: 600; }
+.primary-button:hover { background: #115ea3; border-color: #115ea3; }
+.secondary-button { color: var(--ink); }
+.text-button { color: var(--ink); }
+.tool-button { min-height: 28px; padding: 0 10px; font-size: 12px; }
+.tool-button.active { border-color: var(--pbi-blue); background: #deecf9; color: var(--ink); font-weight: 600; }
+.tool-button--clear.active { border-color: var(--red); background: #fde7e9; color: var(--red); }
+.month-tab { min-height: 32px; border-radius: 0; color: var(--muted); font-size: 13px; font-weight: 400; text-transform: none; border-bottom: 3px solid transparent; }
+.month-tab:hover { background: var(--pbi-hover); color: var(--ink); }
+.month-tab.active { background: transparent; color: var(--ink); font-weight: 600; border-bottom-color: #f2c811; }
+.save-status { color: var(--green); font-size: 12px; font-weight: 400; }
+.color-swatch { border-radius: 2px; border-color: var(--line); }
+.color-swatch.active { border-color: var(--ink); box-shadow: 0 0 0 2px #fff inset; }
+.legend__label { font-size: 12px; font-weight: 400; text-transform: none; }
+.usage-hint, .storage-note { font-size: 12px; }
+.calendar-title-row { padding: 16px 16px 8px; }
+.usage-hint { padding: 0 16px 12px; }
+
+/* таблица — визуал «Матрица» */
+.table-scroll { border-top: 1px solid var(--line); }
+.activity-table { font-size: 12px; }
+.activity-table th, .activity-table td { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.activity-table thead th { background: #fff; color: var(--ink); font-size: 11px; font-weight: 600; text-transform: none; border-bottom: 2px solid var(--pbi-strong); }
+.activity-table thead .sticky { background: #fff; }
+.activity-table .weekend { background-image: none; background-color: #f3f2f1; }
+.activity-table .today { box-shadow: inset 2px 0 #f2c811, inset -2px 0 #f2c811; }
+.editable:focus { box-shadow: inset 0 0 0 2px var(--pbi-blue); background: #fff; }
+.day-cell::after { font-size: 10px; font-weight: 600; }
+.activity-table .direction-cell { border-left-width: 4px; }
+.move-task:hover:not(:disabled) { background: var(--pbi-hover); }
+.calendar-footer { padding: 12px 16px; border-top: 0; }
+.toast { right: 24px; bottom: 24px; border-radius: 2px; background: #252423; font-weight: 400; box-shadow: 0 6.4px 14.4px rgba(0,0,0,.13), 0 1.2px 3.6px rgba(0,0,0,.11); }
+:focus-visible { outline: 2px solid var(--pbi-blue); outline-offset: 1px; }
+
+@media (max-width: 720px) {
+  .hero__inner { grid-template-columns: 1fr; }
+  .today-card { margin: 0 14px 12px; align-self: stretch; }
+  .hero__inner > div:first-child { padding: 12px 14px 8px; }
+  .brand { margin: -12px -14px 12px; padding: 8px 14px; }
+  .shell { padding: 0 10px; margin-top: 12px; }
+  .deadline-panel, .calendar-card { border-radius: 2px; }
+}

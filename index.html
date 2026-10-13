@@ -3,12 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#20233a">
+  <meta name="theme-color" content="#252423">
   <title>Календарь активностей — Level Group</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css?v=6">
+  <link rel="stylesheet" href="powerbi.css?v=1">
 </head>
 <body>
   <header class="hero">
@@ -18,9 +19,9 @@
           <div class="brand__mark">LV</div>
           <div class="brand__copy">Level Group<br>Media Instinct Group</div>
         </div>
-        <p class="eyebrow">Рабочее пространство команды</p>
+        <p class="eyebrow">Level Group · Планирование</p>
         <h1>Календарь активностей</h1>
-        <p class="hero__subtitle">Единый календарь запусков, материалов, аналитики и контрольных точек.</p>
+        <p class="hero__subtitle">Запуски, материалы, аналитика и контрольные точки по месяцам.</p>
       </div>
       <aside class="today-card">
         <span>Сегодня</span>
@@ -69,7 +70,7 @@
         </div>
       </div>
 
-      <p class="usage-hint">Выберите цвет и проводите по ячейкам. Для дедлайна включите «ДЛ». Названия задач и поля слева можно редактировать прямо в таблице. Кнопки ↑ и ↓ меняют порядок задач в месяце; после изменений нажмите «Сохранить изменения».</p>
+      <p class="usage-hint">Выберите цвет и проведите по ячейкам. Для дедлайна включите «ДЛ». Названия задач и поля слева редактируются прямо в таблице. Кнопки ↑ и ↓ меняют порядок задач в месяце. После правок нажмите «Сохранить изменения».</p>
 
       <div class="table-scroll" id="tableScroll">
         <table class="activity-table" id="activityTable">
@@ -91,7 +92,7 @@
       </div>
     </section>
 
-    <p class="storage-note">Данные сохраняются в общей базе и доступны всем пользователям календаря. Локальная копия используется только как резерв при временной недоступности сети.</p>
+    <p class="storage-note">Данные хранятся в общей базе и доступны всем пользователям календаря. Локальная копия нужна только на случай, если сеть временно недоступна.</p>
   </main>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
