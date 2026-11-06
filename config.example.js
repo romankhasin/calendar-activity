@@ -1,4 +1,3 @@
 window.CALENDAR_CONFIG = {
-  supabaseUrl: "https://YOUR_PROJECT.supabase.co",
-  supabasePublishableKey: "YOUR_PUBLISHABLE_KEY"
+  apiUrl: "https://calendar-api.example.com"
 };

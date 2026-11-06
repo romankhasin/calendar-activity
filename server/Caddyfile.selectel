@@ -1,0 +1,9 @@
+taskflow.136.234.14.33.sslip.io {
+    encode zstd gzip
+    reverse_proxy 127.0.0.1:3000
+}
+
+calendar-api.136.234.14.33.sslip.io {
+    encode zstd gzip
+    reverse_proxy 127.0.0.1:3100
+}

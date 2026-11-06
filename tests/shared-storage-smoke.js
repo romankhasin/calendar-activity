@@ -25,59 +25,26 @@ function copy(value) {
   return value == null ? value : JSON.parse(JSON.stringify(value));
 }
 
-function createBackend(initialRow = null) {
+function createBackend(initialRow) {
   let row = copy(initialRow);
-  let realtimeHandler = null;
-  const client = {
-    from() {
-      return {
-        select() {
-          return { eq() { return { maybeSingle: async () => ({ data: copy(row), error: null }) }; } };
-        },
-        insert(value) {
-          return {
-            select() {
-              return {
-                single: async () => {
-                  if (row) return { data: null, error: { code: "23505" } };
-                  row = { ...copy(value), updated_at: "2026-09-29T00:00:00Z" };
-                  return { data: copy(row), error: null };
-                }
-              };
-            }
-          };
-        },
-        update(value) {
-          const filters = {};
-          const builder = {
-            eq(key, expected) { filters[key] = expected; return builder; },
-            select() {
-              return {
-                maybeSingle: async () => {
-                  if (!row || row.id !== filters.id || row.revision !== filters.revision) return { data: null, error: null };
-                  row = { ...row, ...copy(value), updated_at: "2026-09-29T00:01:00Z" };
-                  return { data: { revision: row.revision, updated_at: row.updated_at }, error: null };
-                }
-              };
-            }
-          };
-          return builder;
-        }
-      };
-    },
-    channel() {
-      return {
-        on(_event, _filter, handler) { realtimeHandler = handler; return this; },
-        subscribe() { return this; }
-      };
-    },
-    removeChannel() {}
-  };
   return {
-    client,
+    async fetch(_url, options = {}) {
+      if (!options.method || options.method === "GET") {
+        return { ok: true, status: 200, async json() { return copy(row); } };
+      }
+      const body = JSON.parse(options.body);
+      if (body.expectedRevision !== row.revision) {
+        return { ok: false, status: 409, async json() { return { revision: row.revision }; } };
+      }
+      row = {
+        revision: row.revision + 1,
+        updated_at: "2026-11-06T00:01:00Z",
+        payload: copy(body.payload)
+      };
+      return { ok: true, status: 200, async json() { return { revision: row.revision, updated_at: row.updated_at }; } };
+    },
     get row() { return copy(row); },
-    set row(value) { row = copy(value); },
-    emit(value) { realtimeHandler?.({ new: copy(value) }); }
+    set row(value) { row = copy(value); }
   };
 }
 
@@ -95,8 +62,7 @@ async function start(backend) {
     createElement() { return new FakeElement(); }
   };
   const window = {
-    CALENDAR_CONFIG: { supabaseUrl: "https://test.supabase.co", supabasePublishableKey: "test-publishable-key" },
-    supabase: { createClient() { return backend.client; } },
+    CALENDAR_CONFIG: { apiUrl: "https://calendar-api.test" },
     addEventListener() {},
     confirm() { return true; }
   };
@@ -109,9 +75,13 @@ async function start(backend) {
     },
     Intl, Date, Math, JSON, Number, String, Object, Array, Boolean, Blob, URL,
     FileReader: class {},
+    AbortController,
+    fetch: backend.fetch,
     requestAnimationFrame(callback) { callback(); },
     setTimeout() { return 1; },
     clearTimeout() {},
+    setInterval() { return 1; },
+    clearInterval() {},
     console
   };
   vm.runInNewContext(fs.readFileSync("app.js", "utf8"), context);
@@ -127,14 +97,17 @@ function selectMonth(app, month) {
 }
 
 (async () => {
-  const backend = createBackend();
+  const backend = createBackend({
+    revision: 1,
+    updated_at: "2026-11-06T00:00:00Z",
+    payload: { version: 2, months: {} }
+  });
   const app = await start(backend);
-  if (!backend.row || backend.row.payload.months["2026-09"].tasks.length !== 23) throw new Error("Initial shared state was not created");
 
-  selectMonth(app, 9);
-  app.elements.copyPreviousMonth.listeners.click();
+  selectMonth(app, 10);
+  app.elements.addTask.listeners.click();
   await app.elements.saveButton.listeners.click();
-  if (backend.row.revision !== 2 || backend.row.payload.months["2026-10"]?.tasks.length !== 23) {
+  if (backend.row.revision !== 2 || backend.row.payload.months["2026-11"]?.tasks.length !== 1) {
     throw new Error(`Shared save failed: ${JSON.stringify({ revision: backend.row.revision, months: Object.keys(backend.row.payload.months) })}`);
   }
 

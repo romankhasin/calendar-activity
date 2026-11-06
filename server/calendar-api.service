@@ -1,0 +1,26 @@
+[Unit]
+Description=Calendar Activity API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=calendar-api
+Group=calendar-api
+WorkingDirectory=/opt/calendar-api
+Environment=CALENDAR_HOST=127.0.0.1
+Environment=CALENDAR_PORT=3100
+Environment=CALENDAR_DATA_PATH=/var/lib/calendar-api/calendar.json
+Environment=CALENDAR_ALLOWED_ORIGIN=https://romankhasin.github.io
+ExecStart=/usr/local/bin/node /opt/calendar-api/calendar-api.mjs
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/calendar-api
+UMask=0027
+
+[Install]
+WantedBy=multi-user.target
