@@ -13,16 +13,13 @@ body { background: #f3f2f1; letter-spacing: 0; }
 .today-card, .deadline-panel, .calendar-card, .toast, .deadline-item { backdrop-filter: none; box-shadow: none; }
 
 /* шапка — полоса отчёта на тёмной панели */
-.hero { padding: 0; border-bottom: 1px solid var(--line); background: linear-gradient(#252423, #252423) top / 100% 44px no-repeat, #fff; }
+.hero { padding: 0; border-bottom: 1px solid var(--line); background: #fff; }
 .hero__inner { align-items: stretch; gap: 0; max-width: none; grid-template-columns: 1fr auto; }
 .hero__inner > div:first-child { padding: 12px 24px 14px; }
-.brand { margin: -12px -24px 12px; padding: 8px 24px; gap: 10px; background: #252423; color: #fff; }
-.brand__mark { width: 28px; height: 28px; border: 0; border-radius: 2px; background: #f2c811; color: #252423; box-shadow: none; font-size: 12px; font-weight: 700; }
-.brand__copy { color: #c8c6c4; font-size: 12px; font-weight: 400; letter-spacing: 0; text-transform: none; line-height: 1.2; }
 .eyebrow { margin: 0 0 2px; color: var(--muted); font-size: 12px; font-weight: 400; text-transform: none; }
 h1 { max-width: none; font-size: 24px; font-weight: 600; line-height: 1.25; }
 .hero__subtitle { margin: 4px 0 0; font-size: 14px; line-height: 1.45; }
-.today-card { align-self: start; min-width: 200px; margin: 56px 24px 12px; padding: 8px 14px; border: 1px solid var(--line); border-left: 4px solid #f2c811; border-radius: 2px; background: #faf9f8; }
+.today-card { align-self: start; min-width: 200px; margin: 12px 24px; padding: 8px 14px; border: 1px solid var(--line); border-left: 4px solid #f2c811; border-radius: 2px; background: #faf9f8; }
 .today-card span, .today-card em { font-size: 12px; font-weight: 400; text-transform: none; }
 .today-card strong { margin: 2px 0; font-size: 18px; font-weight: 600; }
 
@@ -83,7 +80,6 @@ button:hover, .text-button--label:hover { transform: none; border-color: var(--i
   .hero__inner { grid-template-columns: 1fr; }
   .today-card { margin: 0 14px 12px; align-self: stretch; }
   .hero__inner > div:first-child { padding: 12px 14px 8px; }
-  .brand { margin: -12px -14px 12px; padding: 8px 14px; }
-  .shell { padding: 0 10px; margin-top: 12px; }
+    .shell { padding: 0 10px; margin-top: 12px; }
   .deadline-panel, .calendar-card { border-radius: 2px; }
 }

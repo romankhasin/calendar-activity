@@ -1,0 +1,16 @@
+/* Общая панель Level Digital Hub (тема «Power BI»).
+   Копия shared/navigation.js + powerbi.css из хаба: при добавлении инструмента обновляйте список ссылок везде. */
+.level-tools-nav{position:relative;z-index:1000;width:100%;background:#252423;font-family:"Segoe UI","Segoe UI Web (West European)",-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif}
+.level-tools-nav *{box-sizing:border-box;letter-spacing:0!important;font-family:inherit!important}
+.level-tools-nav__inner{min-height:48px;padding:0 16px;display:flex;align-items:center;gap:20px;overflow-x:auto}
+.level-tools-nav__brand{flex:0 0 auto;display:inline-flex;align-items:center;gap:10px;color:#fff;text-decoration:none}
+.level-tools-nav__mark{width:28px;height:28px;display:grid;place-items:center;border-radius:2px;background:#F2C811;color:#252423;font-size:12px;font-weight:700}
+.level-tools-nav__brand-copy{display:flex;align-items:baseline;gap:10px}
+.level-tools-nav__brand-title{color:#fff;font-size:14px;font-weight:600}
+.level-tools-nav__brand-subtitle{color:#C8C6C4;font-size:12px;font-weight:400}
+.level-tools-nav__links{display:flex;align-items:stretch;margin-left:auto}
+.level-tools-nav__link{position:relative;min-height:48px;padding:0 14px;display:inline-flex;align-items:center;white-space:nowrap;color:#C8C6C4;font-size:13px;font-weight:400;text-decoration:none}
+.level-tools-nav__link:hover{background:#3B3A39;color:#fff}
+.level-tools-nav__link[aria-current="page"]{color:#fff;font-weight:600}
+.level-tools-nav__link[aria-current="page"]::after{content:"";position:absolute;left:14px;right:14px;bottom:0;height:3px;background:#F2C811}
+@media (max-width:760px){.level-tools-nav__brand-subtitle{display:none}}
